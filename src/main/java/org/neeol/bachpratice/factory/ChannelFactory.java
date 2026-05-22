@@ -4,6 +4,7 @@ import org.neeol.bachpratice.Channels.MailChannel;
 import org.neeol.bachpratice.Channels.SmsChannel;
 import org.neeol.bachpratice.Channels.WhatsappChannel;
 import org.neeol.bachpratice.dto.MessageLogDTO;
+import org.neeol.bachpratice.enums.Channel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,15 +27,17 @@ public class ChannelFactory {
 
         for(MessageLogDTO messageLogDTO : messages){
 
+
+
             switch(messageLogDTO.getChannel()){
 
-                case WHATSAPP:
+                case "WHATSAPP":
                     whatsappChannel.processMessage(messageLogDTO.getMessage());
                     break;
-                case EMAIL:
+                case "EMAIL":
                     mailChannel.processMessage(messageLogDTO.getMessage());
                     break;
-                case SMS:
+                case "SMS":
                     smsChannel.processMessage(messageLogDTO.getMessage());
                     break;
                 default:

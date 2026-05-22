@@ -12,8 +12,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,7 +39,8 @@ public class MessageService {
 
         for(String  campaignId : messageLogDTOMap.keySet()){
 
-            Campaigns campaigns = campaignsService.findById(campaignId).orElseThrow(IllegalArgumentException::new);
+            Campaigns campaigns = campaignsService.findById(campaignId)
+                    .orElseThrow(IllegalArgumentException::new);
 
             for(MessageLogDTO messageLogDTO : messageLogDTOMap.get(campaignId)){
 
@@ -61,7 +60,9 @@ public class MessageService {
 
     private void saveBatch(List<MessageLogDTO> batch, Campaigns campaigns){
 
-        List<MessageLogs> messages = batch.stream().map(messageLogDTO -> new MessageLogs(messageLogDTO, campaigns)).collect(Collectors.toList());
+        List<MessageLogs> messages = batch.stream()
+                .map(messageLogDTO -> new MessageLogs(messageLogDTO, campaigns))
+                .collect(Collectors.toList());
 
         messageLogsRepository.saveAll(messages);
     }
