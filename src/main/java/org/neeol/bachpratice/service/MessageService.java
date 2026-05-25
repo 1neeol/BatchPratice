@@ -62,8 +62,7 @@ public class MessageService {
         }
     }
 
-    public List<AnalyticsDTO> findAllByParams(String campaignId, String channel, String startDate, String endDate) throws Exception {
-
+    public List<AnalyticsDTO> findAllByParamsJpql(String campaignId, String channel, String startDate, String endDate) throws Exception {
 
         PredicateSpecification<MessageLogs> spec = MessageLogsSpecification.campaignId(campaignId)
                 .and(MessageLogsSpecification.channel(channel))
@@ -71,7 +70,16 @@ public class MessageService {
                 .and(MessageLogsSpecification.endDate(endDate));
 
         return messageLogsRepository.countMessageLogsGroupByStatusAndChannel(spec);
+    };
 
+    public List<AnalyticsDTO> findAllByParamsCriteria(String campaignId, String channel, String startDate, String endDate) throws Exception {
+
+        PredicateSpecification<MessageLogs> spec = MessageLogsSpecification.campaignId(campaignId)
+                .and(MessageLogsSpecification.channel(channel))
+                .and(MessageLogsSpecification.startDate(startDate))
+                .and(MessageLogsSpecification.endDate(endDate));
+
+        return messageLogsRepository.countMessageLogsGroupByStatusAndChannel(spec);
     };
 
 

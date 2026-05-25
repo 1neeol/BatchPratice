@@ -18,10 +18,18 @@ public class AnalyticsController {
 
 
     @GetMapping("/criteria/{campaignId}")
-    public List<AnalyticsDTO> findByCampaignId(@PathVariable String campaignId
+    public List<AnalyticsDTO> findByCampaignIdCriteria(@PathVariable String campaignId
             ,@Nullable @RequestParam("channel") String channel
             ,@Nullable @RequestParam("endDate") String endDate
             ,@Nullable @RequestParam("endDate") String startDate) throws Exception {
-        return messageService.findAllByParams(campaignId, channel, startDate, endDate);
+        return messageService.findAllByParamsCriteria(campaignId, channel, startDate, endDate);
+    }
+
+    @GetMapping("/jpql/{campaignId}")
+    public List<AnalyticsDTO> findByCampaignIdJpql(@PathVariable String campaignId
+            ,@Nullable @RequestParam("channel") String channel
+            ,@Nullable @RequestParam("endDate") String endDate
+            ,@Nullable @RequestParam("endDate") String startDate) throws Exception {
+        return messageService.findAllByParamsJpql(campaignId, channel, startDate, endDate);
     }
 }
