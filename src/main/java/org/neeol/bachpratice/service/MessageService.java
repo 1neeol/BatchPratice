@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.PredicateSpecification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -23,18 +24,16 @@ import java.util.stream.Collectors;
 public class MessageService {
 
     @Autowired
-    private AnalyticsService analyticsService;
-    @Autowired
     private MessageLogsRepository messageLogsRepository;
     @Autowired
     private CampaignsService campaignsService;
     @Autowired
     private ChannelFactory channelFactory;
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
     private final int BATCH_SIZE = 100;
 
-
-    @Transactional
     public void processBatch(List<MessageLogDTO> request) throws Exception {
 
         Map<String, List<MessageLogDTO>> messageLogDTOMap = request.stream()
@@ -84,7 +83,10 @@ public class MessageService {
                 .map(messageLogDTO -> new MessageLogs(messageLogDTO, campaigns))
                 .collect(Collectors.toList());
 
-        messageLogsRepository.saveInBatch(messages);
+        transactionTemplate.execute(status -> {
+            messageLogsRepository.saveInBatch(messages);
+            return null;
+        });
     }
 
 }
