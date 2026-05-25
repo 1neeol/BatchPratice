@@ -64,12 +64,11 @@ public class MessageService {
 
     public List<AnalyticsDTO> findAllByParamsJpql(String campaignId, String channel, String startDate, String endDate) throws Exception {
 
-        PredicateSpecification<MessageLogs> spec = MessageLogsSpecification.campaignId(campaignId)
-                .and(MessageLogsSpecification.channel(channel))
-                .and(MessageLogsSpecification.startDate(startDate))
-                .and(MessageLogsSpecification.endDate(endDate));
+        LocalDate start = LocalDate.parse(startDate);
 
-        return messageLogsRepository.countMessageLogsGroupByStatusAndChannel(spec);
+        LocalDate end = LocalDate.parse(endDate);
+
+        return messageLogsRepository.findUsingJpql(campaignId, channel, start, end);
     };
 
     public List<AnalyticsDTO> findAllByParamsCriteria(String campaignId, String channel, String startDate, String endDate) throws Exception {
