@@ -6,6 +6,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class WhatsappChannel implements MessageSenderStrategy {
 
+    @Override
+    public boolean supporter(String channelName){
+        return channelName.equals("WHATSAPP");
+    }
 
     @Override
     public void processMessage(String message) {

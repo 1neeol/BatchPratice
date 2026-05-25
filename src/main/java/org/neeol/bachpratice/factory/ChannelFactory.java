@@ -5,10 +5,12 @@ import org.neeol.bachpratice.Channels.SmsChannel;
 import org.neeol.bachpratice.Channels.WhatsappChannel;
 import org.neeol.bachpratice.dto.MessageLogDTO;
 import org.neeol.bachpratice.enums.Channel;
+import org.neeol.bachpratice.interfaces.MessageSenderStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.neeol.bachpratice.enums.Channel.*;
 
@@ -16,38 +18,17 @@ import static org.neeol.bachpratice.enums.Channel.*;
 public class ChannelFactory {
 
     @Autowired
-    private MailChannel mailChannel;
-    @Autowired
-    private WhatsappChannel whatsappChannel;
-    @Autowired
-    private SmsChannel smsChannel;
-
+    private List<MessageSenderStrategy> messageSenderStrategies;
 
     public void processMessages(List<MessageLogDTO> messages) throws Exception {
-
-        for(MessageLogDTO messageLogDTO : messages){
-
-
-
-            switch(messageLogDTO.getChannel()){
-
-                case "WHATSAPP":
-                    whatsappChannel.processMessage(messageLogDTO.getMessage());
+        for (MessageLogDTO message : messages) {
+            for (MessageSenderStrategy senderStrategy : messageSenderStrategies) {
+                if (senderStrategy.supporter(message.getChannel())) {
+                    senderStrategy.processMessage(message.getMessage());
                     break;
-                case "EMAIL":
-                    mailChannel.processMessage(messageLogDTO.getMessage());
-                    break;
-                case "SMS":
-                    smsChannel.processMessage(messageLogDTO.getMessage());
-                    break;
-                default:
-                    throw new Exception();
-
-
+                }
             }
         }
-
-
     }
 
 }

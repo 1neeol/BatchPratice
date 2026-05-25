@@ -20,11 +20,12 @@ public class MessageController {
     private MessageService messageService;
 
     @PostMapping("/batch")
-    public boolean batch(List<MessageLogDTO> messages){
+    public boolean batch(@RequestBody List<MessageLogDTO> messages){
       try{
           messageService.processBatch(messages);
           return true;
       }catch(Exception e){
+          System.out.println(e);
           return false;
       }
     };

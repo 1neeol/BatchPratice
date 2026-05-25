@@ -4,4 +4,6 @@ public interface MessageSenderStrategy {
 
     void processMessage(String message);
 
+    boolean supporter(String channelName);
+
 }

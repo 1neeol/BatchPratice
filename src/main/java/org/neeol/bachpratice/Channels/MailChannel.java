@@ -10,4 +10,9 @@ public class MailChannel implements MessageSenderStrategy {
     public void processMessage(String message) {
         System.out.println("Sending message to Mail: " + message);
     }
+
+    @Override
+    public boolean supporter(String channelName){
+        return channelName.equals("EMAIL");
+    }
 }

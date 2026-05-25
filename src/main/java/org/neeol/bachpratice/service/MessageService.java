@@ -1,13 +1,18 @@
 package org.neeol.bachpratice.service;
 
+import org.neeol.bachpratice.dto.AnalyticsDTO;
 import org.neeol.bachpratice.dto.MessageLogDTO;
 import org.neeol.bachpratice.factory.ChannelFactory;
 import org.neeol.bachpratice.model.Campaigns;
 import org.neeol.bachpratice.model.MessageLogs;
 import org.neeol.bachpratice.repository.MessageLogsRepository;
+import org.neeol.bachpratice.repository.specifications.MessageLogsSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.PredicateSpecification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,45 +31,60 @@ public class MessageService {
     @Autowired
     private ChannelFactory channelFactory;
 
-    private final int BATCH_SIZE = 50;
+    private final int BATCH_SIZE = 100;
 
+
+    @Transactional
     public void processBatch(List<MessageLogDTO> request) throws Exception {
-
-        int toProcessCount = 0;
 
         Map<String, List<MessageLogDTO>> messageLogDTOMap = request.stream()
                 .collect(Collectors.groupingBy(MessageLogDTO::getCampaignId));
 
-        List<MessageLogDTO> batch = new ArrayList<>();
+        List<MessageLogDTO> batchToProcess = new ArrayList<>();
 
         for(String  campaignId : messageLogDTOMap.keySet()){
 
             Campaigns campaigns = campaignsService.findById(campaignId)
                     .orElseThrow(IllegalArgumentException::new);
 
-            for(MessageLogDTO messageLogDTO : messageLogDTOMap.get(campaignId)){
+            List<MessageLogDTO> itensToProcess = messageLogDTOMap.get(campaignId);
 
-                if(toProcessCount < BATCH_SIZE){
-                    batch.add(messageLogDTO);
-                    request.remove(messageLogDTO);
-                    toProcessCount++;
-                } else {
-                    channelFactory.processMessages(batch);
-                    saveBatch(batch, campaigns);
-                    batch.clear();
-                    toProcessCount = 0;
+            for(MessageLogDTO messageLogDTO : itensToProcess){
+
+                batchToProcess.add(messageLogDTO);
+
+                if(batchToProcess.size() >= BATCH_SIZE ||
+                        (itensToProcess.size() < BATCH_SIZE && batchToProcess.size() == itensToProcess.size())) {
+                    channelFactory.processMessages(batchToProcess);
+                    saveBatch(batchToProcess, campaigns);
+                    batchToProcess.clear();
                 }
             }
         }
     }
 
+    public List<AnalyticsDTO> findAllByParams(String campaignId, String channel, String startDate, String endDate) throws Exception {
+
+
+        PredicateSpecification<MessageLogs> spec = MessageLogsSpecification.campaignId(campaignId)
+                .and(MessageLogsSpecification.channel(channel))
+                .and(MessageLogsSpecification.startDate(startDate))
+                .and(MessageLogsSpecification.endDate(endDate));
+
+        return messageLogsRepository.countMessageLogsGroupByStatusAndChannel(spec);
+
+    };
+
+
     private void saveBatch(List<MessageLogDTO> batch, Campaigns campaigns){
+
+        System.out.println("Processado: " + batch.size());
 
         List<MessageLogs> messages = batch.stream()
                 .map(messageLogDTO -> new MessageLogs(messageLogDTO, campaigns))
                 .collect(Collectors.toList());
 
-        messageLogsRepository.saveAll(messages);
+        messageLogsRepository.saveInBatch(messages);
     }
 
 }
